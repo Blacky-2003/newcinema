@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movie Ticket</title>
+  <link rel="stylesheet" href="./css/ticket.css" />
+  <style>
+    .parkingSection.with-border-top {
+      border-top: dotted #ffce26;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket-container">
+    <div class="ticket" id="ticket">
+      <div class="ticket-header">
+        <p class="brand-logo">nila cinemas</p>
+        <p class="movie-name" id="movie-name"></p>
+      </div>
+      <div class="movie-img">
+        <img
+          src="./assets/TicketBanner/You-have-to-display-Nila-cinemas-.jpg"
+          width="100%"
+          height="200px"
+          style="object-fit: fill"
+          alt="Movie: Only God Forgives"
+        />
+      </div>
+      <div class="info">
+        <table>
+          <tr>
+            <th>SCREEN</th>
+            <th>SEAT</th>
+          </tr>
+          <tr>
+            <td class="bigger" id="screen-number"></td>
+            <td class="bigger" id="seat-number"></td>
+          </tr>
+        </table>
+        <table>
+          <tr>
+            <th>PRICE</th>
+            <th>DATE</th>
+            <th>TIME</th>
+          </tr>
+          <tr>
+            <td id="ticket-price"></td>
+            <td id="ticket-date"></td>
+            <td id="ticket-time"></td>
+          </tr>
+        </table>
+      </div>
+      <div class="qr-code-section">
+        <div class="qr-code" id="qr-code"></div>
+      </div>
+
+      <div class="parkingSection" id="parking-section"></div>
+      <div class="food-section">
+        <div id="food-section">
+          <!-- Food items will be added here dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const movieName = localStorage.getItem("selectedMovieName");
+      const screenNumber = localStorage.getItem("selectedScreen");
+      const ticketDate = localStorage.getItem("selectedDateTime");
+      const ticketTime = localStorage.getItem("selectedTime");
+      const seatNumber = localStorage.getItem("selectedSeats");
+      const ticketPrice = localStorage.getItem("totalPrice");
+      const totalPriceofparking = localStorage.getItem("parkingtotalprice");
+      const foodItems = JSON.parse(localStorage.getItem("selectedFoodItems"));
+      const totalAmount = parseFloat(localStorage.getItem("totalAmount")); // Parse totalAmount as float
+
+      // Update movie name
+      document.getElementById("movie-name").textContent = movieName;
+      // Update screen, row, and seat
+      document.getElementById("screen-number").textContent = screenNumber;
+      document.getElementById("seat-number").textContent = seatNumber;
+      // Update ticket price, date, and time
+      document.getElementById("ticket-price").textContent = `₹${ticketPrice}`;
+      document.getElementById("ticket-date").textContent = ticketDate;
+      document.getElementById("ticket-time").textContent = ticketTime;
+
+      // Check if food items are selected
+      const foodSection = document.getElementById("food-section");
+      if (foodItems && foodItems.length > 0) {
+        const Foodheader = document.createElement("h5");
+        Foodheader.textContent = "Food:";
+        Foodheader.classList.add("food-header");
+        foodSection.appendChild(Foodheader);
+        foodItems.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${item.foodname} - </td> <td>${item.quantity} x </td> <td> ${item.subtotal}</td>`;
+          foodSection.appendChild(row);
+        });
+
+        // Display the total amount for food
+        const totalAmountRow = document.createElement("tr");
+        totalAmountRow.innerHTML = `<td colspan="2" classname="food-total">Total Amount:</td><td>₹${totalAmount}</td>`;
+        foodSection.appendChild(totalAmountRow);
+      }
+
+      // Check if parking slot is selected
+      const selectedSlots = JSON.parse(localStorage.getItem("selectedSlots"));
+      console.log("parking:", selectedSlots);
+      if (selectedSlots && selectedSlots.length > 0) {
+        const parkingSection = document.getElementById("parking-section");
+        parkingSection.classList.add("with-border-top"); // Add border top
+        const parkingInfo = document.createElement("h5");
+        parkingInfo.textContent = "Parking Ticket:";
+        parkingInfo.classList.add("parking-header");
+        parkingSection.appendChild(parkingInfo);
+        selectedSlots.forEach((slot) => {
+          const slotInfo = document.createElement("p");
+          slotInfo.textContent = `${slot.slotNumber} - ₹${slot.price}`;
+          slotInfo.classList.add("parking-slot");
+          parkingSection.appendChild(slotInfo);
+        });
+        const totalprice = document.createElement("p");
+        totalprice.textContent = `Total Price: ₹${totalPriceofparking}`;
+        totalprice.classList.add("parking-slot");
+        parkingSection.appendChild(totalprice);
+      }
+
+      const qrCodeDiv = document.getElementById("qr-code");
+      const qr = qrcode(0, "L");
+      qr.addData("Your QR Code Data Here"); // Replace with your ticket data
+      qr.make();
+      const imgTag = qr.createImgTag();
+      // Add width and height attributes
+      const updatedImgTag = imgTag.replace(
+        "<img",
+        '<img width="100" height="100"'
+      ); // Set your desired width and height
+      qrCodeDiv.innerHTML = updatedImgTag;
+
+    });
+  </script>
+</body>
+</html>
